@@ -11,7 +11,7 @@ from datetime import timedelta
 @api_view(['GET'])
 def WeatherView(request):
     city = request.GET.get('city')
-    days_ago = request.GET.get('days_ago', 0)  # Default to 0 if days_ago is not provided
+    days_ago = request.GET.get('days_ago', 0) 
 
     if not city:
         return Response(status=400, data={"message": "City parameter is required"})
@@ -21,7 +21,6 @@ def WeatherView(request):
     except ValueError:
         return Response(status=400, data={"message": "days_ago must be an integer"})
 
-    # Get the current date in the correct timezone
     now = timezone.localtime(timezone.now())
     target_date = now.date() - timedelta(days=days_ago)
     print(f"Current date: {now.date()}, Target date: {target_date}")
