@@ -5,7 +5,7 @@ class WeatherData(models.Model):
     city_name = models.CharField(max_length=50)
     date = models.DateField()
     time = models.TimeField()
-    temp = models.FloatField()
+    temp = models.CharField(max_length=50)
     humidity = models.CharField(max_length=50)
     heatindex = models.CharField(max_length=50)
     condition = models.CharField(max_length=50)
