@@ -15,6 +15,7 @@ import os
 import dj_database_url
 from django.core.management.utils import get_random_secret_key
 import django_heroku
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -28,7 +29,7 @@ SECRET_KEY = get_random_secret_key()
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['disaster-hackathon-2-0.onrender.com','127.0.0.1']
+ALLOWED_HOSTS = ['disaster-hackathon-2-0.onrender.com', '127.0.0.1']
 
 
 # Application definition
@@ -62,7 +63,7 @@ ROOT_URLCONF = 'weather_analysis.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [os.path.join(BASE_DIR,'templates')],
+        'DIRS': [os.path.join(BASE_DIR, 'templates')],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -123,8 +124,34 @@ USE_TZ = True
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# APScheduler configuration
+APSCHEDULER_JOB_DEFAULTS = {
+    'coalesce': False,
+    'max_instances': 3,
+    'misfire_grace_time': 900  # 15 minutes
+}
+
+# Optional: Configure logging for APScheduler
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+        },
+    },
+    'loggers': {
+        'apscheduler': {
+            'handlers': ['console'],
+            'level': 'DEBUG',
+        },
+    },
+}
+
 django_heroku.settings(locals())

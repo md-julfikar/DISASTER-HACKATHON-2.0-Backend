@@ -1,10 +1,10 @@
 from apscheduler.schedulers.background import BackgroundScheduler
 from django_apscheduler.jobstores import DjangoJobStore, register_events
-from django_apscheduler.jobstores import register_job
 import requests
 from .models import WeatherData
+from django.conf import settings
 
-def fetch_data_from_api():
+def fetch_data_from_api(start_index=0, end_index=64):
     APIKey = '599d55b51f11471c93963600241205'
     districts = [
         "Bagerhat", "Bandarban", "Barguna", "Barisal", "Bhola", "Bogra", "Brahmanbaria", 
@@ -20,8 +20,8 @@ def fetch_data_from_api():
         "Tangail", "Thakurgaon"
     ]
 
-    timeout = 10  # Set your desired timeout for the HTTP request in seconds
-    for city in districts:
+    timeout = 3  # Set your desired timeout for the HTTP request in seconds
+    for city in districts[start_index:end_index]:
         url = f'http://api.weatherapi.com/v1/current.json?key={APIKey}&q={city}'
         try:
             response = requests.get(url, timeout=timeout)
@@ -43,22 +43,19 @@ def fetch_data_from_api():
                 )
         except requests.exceptions.Timeout:
             print(f"Request for {city} timed out after {timeout} seconds.")
-
 def start():
     scheduler = BackgroundScheduler()
     scheduler.add_jobstore(DjangoJobStore(), "default")
 
-    # Configure job defaults
-    job_defaults = {
-        'coalesce': True,
-        'max_instances': 1,
-        'misfire_grace_time': 480  # 8 minutes
-    }
-
+    job_defaults = settings.APSCHEDULER_JOB_DEFAULTS
     scheduler.configure(job_defaults=job_defaults)
 
-    scheduler.add_job(fetch_data_from_api, 'interval', hours=1, name='fetch_data_from_api', jobstore='default')
+    num_districts = 64
+    batch_size = 16 
+    for i in range(0, num_districts, batch_size):
+        start_index = i
+        end_index = min(i + batch_size, num_districts)
+        scheduler.add_job(fetch_data_from_api, 'interval', hours=1, args=[start_index, end_index], name=f'fetch_data_from_api_{i}_{end_index}', jobstore='default')
 
     register_events(scheduler)
-
     scheduler.start()
