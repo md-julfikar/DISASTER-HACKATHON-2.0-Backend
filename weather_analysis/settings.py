@@ -15,6 +15,8 @@ import os
 import dj_database_url
 from django.core.management.utils import get_random_secret_key
 import django_heroku
+import logging
+
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -136,7 +138,7 @@ APSCHEDULER_JOB_DEFAULTS = {
     'max_instances': 3,
     'misfire_grace_time': 900  # 15 minutes
 }
-
+APSCHEDULER_RUN_NOW_TIMEOUT = 900
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
@@ -144,11 +146,21 @@ LOGGING = {
         'console': {
             'class': 'logging.StreamHandler',
         },
+        'file': {
+            'level': 'DEBUG',
+            'class': 'logging.FileHandler',
+            'filename': 'debug.log',
+        },
     },
     'loggers': {
-        'apscheduler': {
-            'handlers': ['console'],
+        'django': {
+            'handlers': ['console', 'file'],
             'level': 'DEBUG',
+        },
+        'apscheduler': {
+            'handlers': ['console', 'file'],
+            'level': 'DEBUG',
+            'propagate': True,
         },
     },
 }
