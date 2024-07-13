@@ -28,7 +28,7 @@ def fetch_data_from_api(start_index=0, end_index=64):
             data = response.json()
             if 'error' not in data:
                 WeatherData.objects.create(
-                    city_name=data['location']['name'],
+                    city_name=str(data['location']['name']).lower(),
                     date=data['location']['localtime'].split(' ')[0],
                     time=data['location']['localtime'].split(' ')[1],
                     temp=data['current']['temp_c'],

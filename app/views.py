@@ -10,7 +10,7 @@ from datetime import timedelta
 
 @api_view(['GET'])
 def WeatherView(request):
-    city = request.GET.get('city')
+    city = str(request.GET.get('city')).lower()
     days_ago = request.GET.get('days_ago', 0) 
 
     if not city:

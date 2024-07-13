@@ -130,14 +130,13 @@ STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# APScheduler configuration
+
 APSCHEDULER_JOB_DEFAULTS = {
     'coalesce': False,
     'max_instances': 3,
     'misfire_grace_time': 900  # 15 minutes
 }
 
-# Optional: Configure logging for APScheduler
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
