@@ -3,8 +3,10 @@ from django_apscheduler.jobstores import DjangoJobStore, register_events
 import requests
 from .models import WeatherData
 from django.conf import settings
+import logging
 
-def fetch_data_from_api(start_index=0, end_index=64):
+logger = logging.getLogger(__name__)
+def fetch_data_from_api():
     APIKey = '599d55b51f11471c93963600241205'
     districts = [
         "Bagerhat", "Bandarban", "Barguna", "Barisal", "Bhola", "Bogra", "Brahmanbaria", 
@@ -20,14 +22,16 @@ def fetch_data_from_api(start_index=0, end_index=64):
         "Tangail", "Thakurgaon"
     ]
 
-    timeout = 3  # Set your desired timeout for the HTTP request in seconds
-    for city in districts[start_index:end_index]:
+    timeout = 3
+    weather_data_list = []
+    for city in districts:
         url = f'http://api.weatherapi.com/v1/current.json?key={APIKey}&q={city}'
         try:
             response = requests.get(url, timeout=timeout)
+            response.raise_for_status()  # Check for HTTP errors
             data = response.json()
             if 'error' not in data:
-                WeatherData.objects.create(
+                weather_data = WeatherData(
                     city_name=str(data['location']['name']).lower(),
                     date=data['location']['localtime'].split(' ')[0],
                     time=data['location']['localtime'].split(' ')[1],
@@ -41,21 +45,22 @@ def fetch_data_from_api(start_index=0, end_index=64):
                     cloud=data['current']['cloud'],
                     precip=data['current']['precip_mm'],
                 )
-        except requests.exceptions.Timeout:
-            print(f"Request for {city} timed out after {timeout} seconds.")
-def start():
+                weather_data_list.append(weather_data)
+        except requests.exceptions.RequestException as e:
+            logger.error(f"Error fetching data for {city}: {e}")
+
+    if weather_data_list:
+        WeatherData.objects.bulk_create(weather_data_list)
+
+def start_scheduler(sender, **kwargs):
     scheduler = BackgroundScheduler()
     scheduler.add_jobstore(DjangoJobStore(), "default")
 
     job_defaults = settings.APSCHEDULER_JOB_DEFAULTS
     scheduler.configure(job_defaults=job_defaults)
 
-    num_districts = 64
-    batch_size = 16 
-    for i in range(0, num_districts, batch_size):
-        start_index = i
-        end_index = min(i + batch_size, num_districts)
-        scheduler.add_job(fetch_data_from_api, 'interval', hours=1, args=[start_index, end_index], name=f'fetch_data_from_api_{i}_{end_index}', jobstore='default')
+    scheduler.add_job(fetch_data_from_api, 'interval', hours=1, name='fetch_data_from_api', jobstore='default')
 
     register_events(scheduler)
     scheduler.start()
+    logger.info("Scheduler started successfully.")

@@ -6,9 +6,5 @@ class MyAppConfig(AppConfig):
     name = 'app'
 
     def ready(self):
-        import app.jobs
+        from .jobs import start_scheduler
         post_migrate.connect(start_scheduler, sender=self)
-
-def start_scheduler(sender, **kwargs):
-    from .jobs import start
-    start()
