@@ -1,13 +1,26 @@
 from django.shortcuts import render
-from django.http import JsonResponse, HttpResponse
-from .models import WeatherData
-from django.utils import timezone
-from rest_framework import generics
-from rest_framework.response import Response
 from rest_framework.decorators import api_view
-from .serializers import WeatherDataSerializer
+from rest_framework.response import Response
+from django.utils import timezone
 from datetime import timedelta
+from rest_framework import generics
+from drf_yasg.utils import swagger_auto_schema
+from drf_yasg import openapi
+from .models import WeatherData
+from .serializers import WeatherDataSerializer
 
+@swagger_auto_schema(
+    method='get',
+    manual_parameters=[
+        openapi.Parameter('city', openapi.IN_QUERY, description="City name", type=openapi.TYPE_STRING, required=True),
+        openapi.Parameter('days_ago', openapi.IN_QUERY, description="Days ago", type=openapi.TYPE_INTEGER, required=False)
+    ],
+    responses={
+        200: WeatherDataSerializer(many=True),
+        400: 'Bad Request',
+        404: 'Not Found'
+    }
+)
 @api_view(['GET'])
 def WeatherView(request):
     city = str(request.GET.get('city')).lower()
@@ -31,3 +44,5 @@ def WeatherView(request):
 
     serializer = WeatherDataSerializer(weather_data, many=True)
     return Response(serializer.data)
+def home(request):
+    return render(request, 'index.html')

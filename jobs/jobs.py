@@ -3,24 +3,21 @@ import logging
 import requests
 from app.models import WeatherData
 logger = logging.getLogger(__name__)
-
-
+from django.utils import timezone
 def get_data():
+    print("Collecting Data")
     APIKey = '599d55b51f11471c93963600241205'
     CITY_MAPPING = {
         "Chittagong": "Chattogram", "Comilla":"Cumilla","Jessore":"Jashore"
     }
 
     citys=['Bagerhat', 'Bandarban', 'Barisal', 'Bhola', 'Bogra', 'Brahmanbaria', 'Chandpur', 'Nawabganj', 'Chittagong', "Cox's Bazar", 'Comilla', 'Dhaka', 'Dinajpur', 'Faridpur', 'Feni', 'Gazipur', 'Gopalganj', 'Habiganj', 'Jamalpur', 'Jessore', 'Khagrachari', 'Khulna', 'Kishoreganj', 'Kushtia', 'Lakshmipur', 'Lalmonirhat', 'Madaripur', 'Magura', 'Manikganj', 'Munshiganj', 'Mymensingh', 'Naogaon', 'Narail', 'Narayanganj', 'Narsingdi', 'Noakhali', 'Pabna', 'Panchagarh', 'Patuakhali', 'Pirojpur', 'Rajbari', 'Rajshahi', 'Rangamati', 'Rangpur', 'Satkhira', 'Sherpur', 'Sirajganj', 'Sunamganj', 'Sylhet', 'Tangail', 'Thakurgaon']
-    timeout = 3
+
     weather_data_list = []
     for city in citys:
-        if city in CITY_MAPPING:
-            url = f'http://api.weatherapi.com/v1/current.json?key={APIKey}&q={CITY_MAPPING[city]}'
-        else:
-            url = f'http://api.weatherapi.com/v1/current.json?key={APIKey}&q={city}'
+        url = f'http://api.weatherapi.com/v1/current.json?key={APIKey}&q={city}'
         try:
-            response = requests.get(url, timeout=timeout)
+            response = requests.get(url)
             response.raise_for_status() 
             data = response.json()
             if 'error' not in data:
@@ -44,3 +41,4 @@ def get_data():
 
     if weather_data_list:
         WeatherData.objects.bulk_create(weather_data_list)
+    print("Data collected Sucessfully  at : ",timezone.localtime(timezone.now()))
