@@ -93,7 +93,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'disasterhackatho$weatherData',
         'USER': 'disasterhackatho',
-        'PASSWORD': '', 
+        'PASSWORD': 'julfikar123', 
         'HOST': 'disasterhackathon.mysql.pythonanywhere-services.com',
         'PORT': '3306', 
     }
