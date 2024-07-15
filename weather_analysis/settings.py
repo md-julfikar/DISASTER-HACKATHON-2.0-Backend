@@ -85,8 +85,18 @@ WSGI_APPLICATION = 'weather_analysis.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
+# DATABASES = {
+#     'default': dj_database_url.parse('postgresql://postgres:TRDdusNaCPQXWLWDiMydNkTBvXVypskV@monorail.proxy.rlwy.net:19603/railway', conn_max_age=600)
+# }
 DATABASES = {
-    'default': dj_database_url.parse('postgresql://postgres:TRDdusNaCPQXWLWDiMydNkTBvXVypskV@monorail.proxy.rlwy.net:19603/railway', conn_max_age=600)
+    'default': {
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'disasterhackatho$weatherData',
+        'USER': 'disasterhackatho',
+        'PASSWORD': '', 
+        'HOST': 'disasterhackathon.mysql.pythonanywhere-services.com',
+        'PORT': '3306', 
+    }
 }
 
 
